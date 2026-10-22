@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% block title %}Motoristas V1.4{% endblock %}
+{% block content %}<div class="container admin-main v14-page">
+  {% set v14_header_title = 'Motoristas' %}
+  {% include '_v14_nav.html' %}
+  <section class="admin-panel v14-section"><div class="panel-title"><div><h2>Novo motorista</h2><p class="muted">Deixe a frota em branco para registar um motorista individual.</p></div></div>
+    <form class="v14-form" method="post" action="{{ url_for('admin_motorista_create_v14') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Nome completo <input name="nome" required maxlength="160"></label><label>E-mail <input name="email" type="email" maxlength="180"></label>
+      <label>Telefone <input name="telefone" maxlength="40"></label><label>NIF (opcional) <input name="nif" maxlength="32"></label>
+      <label>Vínculo <select name="frota_id"><option value="">Motorista individual</option>{% for f in frotas %}<option value="{{ f.id }}">{{ f.empresa }}</option>{% endfor %}</select></label>
+      <div class="v14-form-actions"><button class="btn btn-primary">+ Registar motorista</button></div>
+    </form>
+  </section>
+  <section class="admin-panel"><div class="panel-title"><h2>Motoristas registados</h2><span class="muted">{{ rows|length }} registo(s)</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Frota</th><th>Contacto</th><th>Estado</th><th>Gerir</th></tr></thead><tbody>
+      {% for r in rows %}<tr><td><small>#{{ r.id }}</small><br><strong>{{ r.nome }}</strong></td><td>{{ r.nome_frota or 'Individual' }}</td><td>{{ r.email or '—' }}<br><small>{{ r.telefone }}</small></td><td><span class="pill {{ 'good' if r.ativo else 'muted-pill' }}">{{ 'Ativo' if r.ativo else 'Inativo' }}</span></td>
+        <td><details><summary>Editar</summary><form class="v14-edit" method="post" action="{{ url_for('admin_motorista_update_v14',id=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label>Nome <input name="nome" value="{{ r.nome }}" required></label><label>E-mail <input name="email" type="email" value="{{ r.email }}"></label>
+          <label>Telefone <input name="telefone" value="{{ r.telefone }}"></label><label>NIF <input name="nif" value="{{ r.nif }}"></label>
+          <label>Frota <select name="frota_id"><option value="">Individual</option>{% for f in frotas %}<option value="{{ f.id }}" {% if r.frota_id==f.id %}selected{% endif %}>{{ f.empresa }}</option>{% endfor %}</select></label>
+          <button class="btn btn-primary">Guardar</button></form></details>
+          <form method="post" action="{{ url_for('admin_motorista_toggle_v14',id=r.id) }}" class="v14-small-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="v14-link">{{ 'Inativar' if r.ativo else 'Reativar' }}</button></form>
+        </td></tr>{% else %}<tr><td colspan="5" class="empty">Nenhum motorista registado.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>{% endblock %}

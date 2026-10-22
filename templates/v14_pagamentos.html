@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% block title %}Mensalidades V1.4{% endblock %}
+{% block content %}<div class="container admin-main v14-page">
+  {% set v14_header_title = 'Pagamentos mensais' %}
+  {% include '_v14_nav.html' %}
+  <div class="v14-controls"><form method="get" action="{{ url_for('admin_pagamentos_v14') }}"><label>Mês de competência <input type="month" name="mes" value="{{ mes }}" required></label><button class="btn btn-outline">Consultar</button></form>
+  <div style="display:flex;gap:8px"><a class="btn btn-outline" href="{{ url_for('admin_payment_csv_v14',mes=mes) }}">Exportar CSV</a><a class="btn btn-outline" href="{{ url_for('admin_pagamentos_pdf_v14',mes=mes) }}">Descarregar PDF</a></div></div>
+  <div class="v14-kpis v14-finance">
+    <article><span>Total lançado</span><strong>{{ dados.total|euros_v14 }}</strong></article>
+    <article><span>Confirmado</span><strong>{{ dados.pago|euros_v14 }}</strong></article>
+    <article><span>Pendente</span><strong>{{ dados.pendente|euros_v14 }}</strong></article>
+    <article><span>Vencido</span><strong>{{ dados.vencido|euros_v14 }}</strong></article>
+  </div>
+  <section class="admin-panel v14-section"><div class="panel-title"><div><h2>Gerar mensalidades — {{ mes }}</h2><p class="muted">Cria apenas mensalidades de contratos ativos na competência escolhida. Repetir a operação não duplica cobranças.</p></div></div>
+    <form method="post" action="{{ url_for('admin_payment_generate_v14') }}" class="v14-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Competência <input type="month" name="mes" value="{{ mes }}" required></label><div class="v14-form-actions"><button class="btn btn-primary">Gerar mensalidades</button></div></form>
+  </section>
+  <section class="admin-panel"><div class="panel-title"><h2>Pagamentos do mês {{ mes }}</h2><span class="muted">Marcação manual; não há transferência automática</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Veículo / Contrato</th><th>Beneficiário</th><th>Valor</th><th>Vencimento</th><th>Estado</th><th>Confirmação</th></tr></thead><tbody>
+    {% for r in rows %}<tr><td><strong>{{ r.matricula }}</strong><br><small>Contrato #{{ r.contrato_id }}</small></td><td>{{ r.beneficiario }}<br><small>{{ r.beneficiario_tipo }}</small></td>
+      <td>{{ r.valor_centimos|euros_v14 }}</td><td>{{ r.vencimento }}</td>
+      <td>{% if r.estado=='PAGO' %}<span class="pill good">Pago</span>{% elif r.vencimento < hoje %}<span class="pill">Em atraso</span>{% else %}<span class="pill muted-pill">Pendente</span>{% endif %}</td>
+      <td>{% if r.estado=='PAGO' %}<small>{{ r.pago_em }}<br>{{ r.referencia }}</small>{% else %}
+      <form method="post" action="{{ url_for('admin_payment_mark_v14',id=r.id) }}" class="v14-inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input name="referencia" maxlength="160" required placeholder="Ref. comprovativo" aria-label="Referência do pagamento"><button class="v14-link">Marcar pago</button></form>{% endif %}</td>
+    </tr>{% else %}<tr><td colspan="6" class="empty">Nenhum pagamento gerado neste mês. Registe contratos e clique em Gerar mensalidades.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <div class="v14-privacy">Valores calculados em euros (€). “Pago” é uma declaração manual do administrador; não implica integração com banco ou faturação fiscal.</div>
+</div>{% endblock %}

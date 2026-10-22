@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Inteligente V1.3.1{% endblock %}
+{% block content %}
+{% set admin = role == 'admin' %}
+{% set view_url = 'admin_intelligence' if admin else 'advertiser_intelligence' %}
+{% set csv_url = 'admin_intelligence_csv' if admin else 'advertiser_intelligence_csv' %}
+{% set print_url = 'admin_intelligence_print' if admin else 'advertiser_intelligence_print' %}
+{% set pdf_url = 'admin_intelligence_pdf' if admin else 'advertiser_intelligence_pdf' %}
+<div class="container admin-main v131-main" id="dashboard-v131">
+  <div class="admin-heading v131-heading">
+    <div><span class="kicker">ROTAADS · DASHBOARD INTELIGENTE V1.3.1</span><h1>{{ 'Visão executiva' if admin else 'Desempenho das minhas campanhas' }}</h1>
+      <p>Indicadores técnicos, zonas publicitárias, horários e conversões registadas.</p></div>
+    <div class="v131-actions no-print">
+      <a class="btn btn-outline" href="{{ url_for(csv_url, dias=report.dias) }}">↓ Exportar CSV</a>
+      <a class="btn btn-outline" href="{{ url_for(pdf_url, dias=report.dias) }}" download>↓ Descarregar PDF</a>
+      <a class="btn btn-outline" href="{{ url_for(print_url, dias=report.dias) }}" target="_blank" rel="noopener">↗ Imprimir página</a>
+      <a class="btn btn-primary" href="{{ url_for(view_url, dias=report.dias) }}">Atualizar ↻</a>
+    </div>
+  </div>
+  <div class="v131-toolbar no-print">
+    <div class="filter-tabs v131-tabs" aria-label="Filtrar período">
+      {% for d in [7,30,90] %}<a href="{{ url_for(view_url,dias=d) }}" class="{{ 'selected' if report.dias == d else '' }}">Últimos {{ d }} dias</a>{% endfor %}
+    </div>
+    <div class="v131-updated"><span class="v131-dot"></span><span id="v131-clock">Atualizado em {{ report.atualizado_em[:16].replace('T',' ') }} UTC</span> · <span>Atualização da página a cada 60 s</span></div>
+  </div>
+  {% if print_view %}<div class="v131-print-row no-print"><button class="btn btn-primary" onclick="window.print()">Imprimir ou guardar em PDF</button></div>{% endif %}
+  <div class="v131-kpis">
+    <div class="v131-kpi v131-feature"><span>Reproduções iniciadas</span><strong>{{ '{:,}'.format(report.resumo.reproducoes).replace(',','.') }}</strong><small>Eventos reportados pelos ecrãs · {{ report.dias }} dias</small></div>
+    <div class="v131-kpi"><span>Ecrãs online agora</span><strong>{{ report.resumo.ecra_online }} <i>/ {{ report.resumo.ecra_total }}</i></strong><small>Sinal nos últimos 120 segundos</small></div>
+    <div class="v131-kpi"><span>Campanhas em curso</span><strong>{{ report.resumo.campanhas_ativas }} <i>/ {{ report.resumo.campanhas }}</i></strong><small>Segundo estado e datas registadas</small></div>
+    <div class="v131-kpi"><span>Leituras QR</span><strong>{{ report.resumo.leituras }}</strong><small>Entradas nas páginas das ofertas</small></div>
+    <div class="v131-kpi"><span>Resgates registados</span><strong>{{ report.resumo.resgates }}</strong><small>Confirmações manuais de cupão</small></div>
+    <div class="v131-kpi"><span>QR / reproduções</span><strong>{{ report.resumo.leituras_por_100_reproducoes if report.resumo.leituras_por_100_reproducoes is not none else '—' }}<i>{{ '%' if report.resumo.leituras_por_100_reproducoes is not none else '' }}</i></strong><small>Leituras por 100 reproduções; não são vendas</small></div>
+  </div>
+  <div class="v131-two">
+    <section class="admin-panel v131-panel v131-wide">
+      <div class="panel-title"><div><h2>Desempenho diário</h2><p class="muted">Reproduções, leituras QR e resgates · datas em UTC</p></div><span class="v131-tag">{{ report.dias }} dias</span></div>
+      <div id="v131-trend" class="v131-trend" role="img" aria-label="Gráfico de reproduções e leituras por dia"><p class="muted">O gráfico será apresentado quando o navegador carregar.</p></div>
+      <div class="v131-legend"><span class="v131-l1">Reproduções iniciadas</span><span class="v131-l2">Leituras QR</span><span class="v131-l3">Resgates</span></div>
+      <details class="v131-details"><summary>Ver dados diários em tabela</summary>
+       <div class="table-wrap"><table><thead><tr><th>Data UTC</th><th>Reproduções</th><th>QR</th><th>Resgates</th></tr></thead><tbody>
+       {% for row in report.diario %}<tr><td>{{ row.data }}</td><td>{{ row.reproducoes }}</td><td>{{ row.leituras }}</td><td>{{ row.resgates }}</td></tr>{% endfor %}
+       </tbody></table></div></details>
+    </section>
+    <section class="admin-panel v131-panel">
+      <div class="panel-title"><div><h2>Horários de maior atividade</h2><p class="muted">Fuso Europe/Lisbon</p></div></div>
+      <div class="v131-hours" aria-label="Reproduções por hora de Portugal">
+        {% set highest = (report.horario | map(attribute='reproducoes') | max) or 1 %}
+        {% for h in report.horario %}<div class="v131-hour" title="{{ h.hora }} — {{ h.reproducoes }} reproduções"><div class="v131-hval">{{ h.reproducoes }}</div><div class="v131-hbar"><span style="height:{{ (100 * h.reproducoes / highest) | round(1) }}%"></span></div><small>{{ h.hora[:2] if loop.index0 % 3 == 0 else '·' }}</small></div>{% endfor %}
+      </div><p class="v131-footnote">Contagens por hora local, considerando a mudança para o horário de verão em Portugal.</p>
+    </section>
+    <section class="admin-panel v131-panel">
+      <div class="panel-title"><div><h2>Reproduções por zona</h2><p class="muted">Contagem agregada, sem trajetos dos motoristas</p></div></div>
+      {% set maxzone = (report.zonas | map(attribute='reproducoes') | max) if report.zonas else 0 %}
+      {% for z in report.zonas %}<div class="v131-zone-row"><div class="v131-barlabel"><strong>{{ z.nome }}</strong><span>{{ z.reproducoes }}</span></div><div class="v131-track"><span style="width:{{ (100*z.reproducoes / maxzone) | round(1) if maxzone else 0 }}%"></span></div></div>
+      {% else %}<p class="muted">Ainda não existem reproduções por zona no período.</p>{% endfor %}
+    </section>
+    <section class="admin-panel v131-panel">
+      <div class="panel-title"><div><h2>Oportunidades de melhoria</h2><p class="muted">Recomendações determinísticas baseadas nos registos</p></div></div>
+      {% for heading, content in report.sugestoes %}<div class="v131-insight"><span class="v131-insight-icon">↗</span><div><strong>{{ heading }}</strong><p>{{ content }}</p></div></div>
+      {% else %}<p class="muted">Ainda não existem sugestões para este período.</p>{% endfor %}
+      <p class="v131-footnote">Não é uma IA treinada. Nenhuma recomendação altera anúncios automaticamente.</p>
+    </section>
+  </div>
+  <section class="admin-panel v131-panel">
+    <div class="panel-title"><div><h2>Comparar campanhas</h2><p class="muted">Valores contabilizados apenas no período selecionado.</p></div><span class="v131-tag">{{ report.campanhas|length }} campanhas</span></div>
+    <div class="table-wrap"><table class="v131-table"><thead><tr><th>Campanha</th>{% if admin %}<th>Anunciante</th>{% endif %}<th>Prioridade</th><th>Carros atribuídos</th><th>Reproduções</th><th>QR</th><th>Resgates</th><th>Estado</th></tr></thead><tbody>
+    {% for c in report.campanhas %}<tr><td><strong>{{ c.nome }}</strong></td>{% if admin %}<td>{{ c.anunciante }}</td>{% endif %}<td>{{ c.peso_v13 }} / 5</td><td>{{ c.atribuidos }} / {{ c.carros_contratados }}</td><td><strong>{{ c.reproducoes }}</strong></td><td>{{ c.leituras }}</td><td>{{ c.resgates }}</td><td><span class="pill {{ 'good' if c.em_curso else 'muted-pill' }}">{{ 'Em curso' if c.em_curso else 'Inativa / fora de datas' }}</span></td></tr>
+    {% else %}<tr><td class="empty" colspan="8">Sem campanhas associadas.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <div class="v131-disclaimer"><strong>Transparência nas métricas.</strong> As reproduções são inícios técnicos reportados pelos players, não comprovativos de visualização humana. As leituras QR representam acessos, não pessoas únicas. Os resgates dependem de confirmação manual e não comprovam necessariamente uma venda. Os totais de carros contratados somam pacotes e podem incluir o mesmo ecrã em campanhas diferentes. Os gráficos diários utilizam UTC; as horas seguem Portugal.</div>
+  <div class="v131-bottom no-print"><a href="{{ url_for('admin_dashboard') if admin else url_for('advertiser_home') }}">← Voltar ao painel</a><span>V1.3.1 — preserva GPS, player e algoritmo da V1.3</span></div>
+</div>
+<script type="application/json" id="v131-data">{{ report.diario | tojson }}</script>
+<script defer src="{{ url_for('static',filename='dashboard_v131.js') }}"></script>
+{% endblock %}

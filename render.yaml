@@ -1,0 +1,24 @@
+# Demonstração temporária: SQLite e carregamentos NÃO persistem no plano gratuito.
+services:
+  - type: web
+    name: rotaads-demonstracao
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: DEMO_MODE
+        value: '1'
+      - key: APP_NAME
+        value: 'RotaAds - DEMONSTRACAO'
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DEMO_ACCESS_PASSWORD
+        sync: false
+      - key: DEMO_ADVERTISER_PASSWORD
+        sync: false

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Solicitar proposta{% endblock %}
+{% block content %}
+<section class="contact-section"><div class="container contact-layout">
+  <div class="contact-copy"><span class="kicker">ENTRAR EM CONTACTO</span><h1>Uma boa parceria<br>começa aqui<span class="color-accent">.</span></h1><p>Escolha o seu perfil e preencha os dados. A nossa equipa poderá preparar os próximos passos.</p>
+    <div class="contact-tips"><span class="checkcircle">✓</span><span>Formulário direto e sem compromisso</span></div><div class="contact-tips"><span class="checkcircle">✓</span><span>Condições ajustadas ao perfil e à cidade</span></div>
+  </div>
+  <div class="form-shell">
+    <span class="form-small">QUAL É O SEU PERFIL?</span>
+    <div class="form-tabs">
+      {% for key,label in form_types.items() %}<a class="form-tab {% if tipo==key %}active{% endif %}" href="{{ url_for('contact', tipo=key) }}">{% if key=='anunciante' %}Empresa{% elif key=='agencia' %}Agência{% elif key=='frota' %}Frota TVDE{% else %}Motorista{% endif %}</a>{% endfor %}
+    </div>
+    <h2>{{ form_types[tipo] }}</h2>
+    <p class="form-help">{% if tipo in ('anunciante','agencia') %}Conte-nos quantos carros pretende incluir na campanha.{% else %}Indique quantos carros pode disponibilizar para publicidade.{% endif %}</p>
+    <form method="post" action="{{ url_for('contact', tipo=tipo) }}" class="contact-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="tipo" value="{{ tipo }}">
+      <div class="honey"><label>Website <input type="text" tabindex="-1" autocomplete="off" name="website"></label></div>
+      <div class="form-field"><label for="nome">Nome completo <b>*</b></label><input id="nome" name="nome" required maxlength="130" placeholder="O seu nome" value="{{ request.form.get('nome', '') }}"></div>
+      <div class="form-field"><label for="email">E-mail <b>*</b></label><input id="email" type="email" name="email" required maxlength="200" placeholder="nome@empresa.pt" value="{{ request.form.get('email', '') }}"></div>
+      <div class="form-field"><label for="empresa">Nome da empresa <b>*</b></label><input id="empresa" name="empresa" required maxlength="140" placeholder="{% if tipo == 'motorista' %}Nome comercial ou nome próprio{% else %}Nome da empresa{% endif %}" value="{{ request.form.get('empresa', '') }}"></div>
+      <div class="form-cols"><div class="form-field"><label for="cidade">Cidade <b>*</b></label><input id="cidade" name="cidade" required maxlength="90" placeholder="Ex.: Lisboa" value="{{ request.form.get('cidade', '') }}"></div>
+      <div class="form-field"><label for="carros">{% if tipo in ('anunciante','agencia') %}Carros para a campanha{% else %}Carros disponíveis{% endif %} <b>*</b></label><input id="carros" name="carros" type="number" required min="1" max="100000" value="{{ request.form.get('carros', request.args.get('carros', '1' if tipo=='motorista' else '')) }}" placeholder="Ex.: 25"></div></div>
+      <label class="privacy-check"><input type="checkbox" name="privacidade" value="sim" required {% if request.form.get('privacidade')=='sim' %}checked{% endif %}><span>Li a <a href="{{ url_for('privacy') }}" target="_blank" rel="noopener">informação de privacidade</a> e aceito que os meus dados sejam tratados para responder ao pedido. <b>*</b></span></label>
+      <button type="submit" class="btn btn-primary btn-submit">Enviar pedido <span>↗</span></button>
+      <p class="form-note">Não é necessário pagamento para solicitar contacto.</p>
+    </form>
+  </div>
+</div></section>
+{% endblock %}

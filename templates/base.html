@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08172b">
+  <meta name="description" content="Publicidade inteligente dentro de veículos TVDE. Campanhas em ecrãs Android com acompanhamento e métricas.">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>{% block title %}{{ app_name }}{% endblock %} — Publicidade em movimento</title>
+</head>
+<body class="{% if request.path.startswith(('/admin', '/anunciante')) %}admin-body{% endif %}">
+  {% if demo_mode %}
+  <div class="demo-banner">AMBIENTE DE DEMONSTRAÇÃO · Dados fictícios · Não introduza informações reais · Os registos podem ser repostos</div>
+  {% endif %}
+  <header class="nav-wrap">
+    <div class="container navbar">
+      <a href="{{ url_for('home') }}" class="logo" aria-label="{{ app_name }} — início">
+        <span class="logo-mark">↗</span><span>{{ app_name }}</span><span class="logo-dot">.</span>
+      </a>
+      <nav class="nav-links" aria-label="Menu principal">
+        {% if request.path.startswith('/admin') and session.get('admin_logged') %}
+          <a href="{{ url_for('admin_dashboard') }}">Painel</a>
+          <a href="{{ url_for('admin_leads') }}">Pedidos</a>
+          <a href="{{ url_for('admin_campaigns') }}">Campanhas</a>
+          <a href="{{ url_for('admin_devices') }}">Ecrãs</a>
+          <a href="{{ url_for('admin_frotas_v14') }}">Frotas V1.4</a>
+          <a href="{{ url_for('admin_map') }}">Mapa ao vivo</a>
+          <a href="{{ url_for('admin_zones') }}">Zonas GPS</a>
+          <a href="{{ url_for('admin_intelligence') }}">Dashboard Inteligente</a>
+          <a href="{{ url_for('admin_optimization') }}">Otimização V1.3</a>
+          <a href="{{ url_for('admin_assign') }}">Atribuições</a>
+          <a href="{{ url_for('admin_advertisers') }}">Anunciantes</a>
+          <form method="post" action="{{ url_for('admin_logout') }}" class="nav-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="nav-logout">Sair</button>
+          </form>
+        {% elif request.path.startswith('/anunciante') and session.get('anunciante_id') %}
+          <a href="{{ url_for('advertiser_home') }}">Visão geral</a>
+          <a href="{{ url_for('advertiser_intelligence') }}">Resultados avançados</a>
+          <form method="post" action="{{ url_for('advertiser_logout') }}" class="nav-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="nav-logout">Terminar sessão</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('home') }}#como-funciona">Como funciona</a>
+          <a href="{{ url_for('home') }}#solucoes">Soluções</a>
+          <a href="{{ url_for('home') }}#pacotes">Pacotes</a>
+          <a href="{{ url_for('advertiser_login') }}">Portal do anunciante</a>
+          <a href="{{ url_for('contact', tipo='anunciante') }}" class="nav-action">Pedir proposta <span>↗</span></a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  {% with messages=get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div class="container flash-stack" role="status">{% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}</div>{% endif %}
+  {% endwith %}
+  <main>{% block content %}{% endblock %}</main>
+  {% if not request.path.startswith(('/admin', '/anunciante')) %}
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div><div class="logo footer-logo"><span class="logo-mark">↗</span><span>{{ app_name }}</span><span class="logo-dot">.</span></div>
+        <p>Campanhas que acompanham a cidade.</p>
+      </div>
+      <div class="footer-links"><a href="{{ url_for('privacy') }}">Privacidade</a><a href="{{ url_for('contact') }}">Contacto</a><a href="{{ url_for('admin_login') }}">Gestão</a></div>
+      <span class="footer-copy">© 2026 {{ app_name }}. Todos os direitos reservados.</span>
+    </div>
+  </footer>
+  {% endif %}
+</body>
+</html>

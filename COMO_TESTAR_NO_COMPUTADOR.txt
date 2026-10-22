@@ -1,0 +1,35 @@
+ROTAADS V1.4 - FROTAS E MOTORISTAS - INSTALACAO SEGURA
+
+1. PARE a V1.3.1 com Ctrl+C.
+2. DESCOMPACTE o ZIP numa PASTA NOVA: C:\rotaads_v1_4
+3. Abra o PowerShell e execute:
+
+cd C:\rotaads_v1_4
+py migrar_da_v1_3_1.py "C:\Users\engjo\OneDrive\Documentos\Programa rotaads"
+
+A mensagem OK confirma que a origem foi preservada e o backup foi criado.
+Se V1.3.1 estiver em outra pasta, mude o segundo caminho.
+
+4. PREPARE:
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python configurar_windows.py
+
+5. TESTE:
+python testes_v1_0.py
+python testes_v1_1.py
+python testes_v1_2.py
+python testes_v1_3.py
+python testes_v1_3_1.py
+python testes_v1_3_1_flask.py
+python testes_correcao_pdf_v131.py
+python testes_v1_4.py
+
+6. INICIE:
+python app.py
+
+7. ABRA no navegador: http://127.0.0.1:5000/admin/frotas
+
+PASSOS: cadastrar frota -> motorista -> veiculo -> contrato -> pagamentos.
+IMPORTANTE: Nao remova a pasta anterior, .env ou backup.

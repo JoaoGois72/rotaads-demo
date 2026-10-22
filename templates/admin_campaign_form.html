@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Nova campanha{% endblock %}
+{% block content %}<div class="container admin-main narrow-admin"><div class="admin-heading"><div><span class="kicker">CRIAR CAMPANHA</span><h1>Nova publicidade</h1><p>Defina o anunciante, o pacote contratado e o anúncio.</p></div></div>
+<form method="post" enctype="multipart/form-data" class="admin-panel admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-cols"><div class="form-field"><label>Nome da campanha *</label><input name="nome" maxlength="120" required placeholder="Campanha Outono"></div><div class="form-field"><label>Empresa anunciante *</label><input name="anunciante" maxlength="140" required placeholder="Nome do anunciante"></div></div>
+<div class="form-cols"><div class="form-field"><label>Cidade de referência</label><input name="cidade" maxlength="90" placeholder="Lisboa"></div><div class="form-field"><label>Número de carros contratados *</label><input name="carros_contratados" type="number" min="1" max="100000" required placeholder="25"></div></div>
+<div class="form-field" style="margin-bottom:19px"><label>Conta do anunciante (Portal V1.1)</label>
+<select name="anunciante_id"><option value="">Sem associação — não aparece no portal</option>{% for a in advertisers %}<option value="{{ a.id }}">{{ a.empresa }} — {{ a.email }}</option>{% endfor %}</select>
+<small>A associação pode ser efetuada mais tarde na ficha da campanha.</small></div>
+<div class="form-cols"><div class="form-field"><label>Início (opcional)</label><input name="data_inicio" type="date"></div><div class="form-field"><label>Fim (opcional)</label><input name="data_fim" type="date"></div></div>
+<div class="form-cols"><div class="form-field"><label>Imagem ou vídeo *</label><input name="ficheiro" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.mp4,.webm" required><small>PNG, JPG, WEBP, GIF, MP4 ou WEBM. Preferir MP4 (H.264).</small></div><div class="form-field"><label>Duração de imagens (segundos)</label><input name="duracao_seg" type="number" min="5" max="600" value="12"></div></div>
+<div class="section-divider">Cupão por QR Code <span>Opcional — decidido pelo anunciante</span></div>
+<label class="privacy-check"><input name="cupao_ativo" value="sim" type="checkbox" id="coupon-toggle"><span>Ativar QR Code de oferta nesta campanha</span></label>
+<div class="form-cols"><div class="form-field"><label>Código do cupão</label><input name="cupao_codigo" maxlength="50" placeholder="EX.: VIAGEM10"></div><div class="form-field"><label>Página externa da oferta (opcional)</label><input name="cupao_url" type="url" placeholder="https://empresa.pt/oferta"></div></div>
+<div class="form-field"><label>Descrição da oferta</label><textarea name="cupao_descricao" rows="3" maxlength="240" placeholder="10% de desconto na próxima visita"></textarea></div>
+<div class="form-actions"><button class="btn btn-primary" type="submit">Guardar campanha ↗</button><a class="btn btn-outline" href="{{ url_for('admin_campaigns') }}">Cancelar</a></div>
+</form></div>{% endblock %}

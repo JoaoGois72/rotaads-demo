@@ -1,0 +1,12 @@
+<div class="v14-banner">
+  <div><span class="kicker">GESTÃO OPERACIONAL · V1.4</span><h1>{{ v14_header_title|default('Frotas e motoristas') }}</h1>
+  <p>Parceiros TVDE, veículos, cedências publicitárias e mensalidades. Área exclusiva do administrador.</p></div>
+  <span class="v14-pill">Registos financeiros manuais</span>
+</div>
+<nav class="v14-tabs" aria-label="Gestão de frotas">
+  <a class="{{ 'selected' if request.path == '/admin/frotas' else '' }}" href="{{ url_for('admin_frotas_v14') }}">Frotas</a>
+  <a class="{{ 'selected' if request.path == '/admin/motoristas' else '' }}" href="{{ url_for('admin_motoristas_v14') }}">Motoristas</a>
+  <a class="{{ 'selected' if request.path == '/admin/veiculos' else '' }}" href="{{ url_for('admin_veiculos_v14') }}">Veículos</a>
+  <a class="{{ 'selected' if request.path == '/admin/contratos' else '' }}" href="{{ url_for('admin_contratos_v14') }}">Contratos</a>
+  <a class="{{ 'selected' if request.path == '/admin/pagamentos' else '' }}" href="{{ url_for('admin_pagamentos_v14') }}">Pagamentos</a>
+</nav>

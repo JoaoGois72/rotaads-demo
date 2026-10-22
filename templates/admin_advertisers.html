@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Contas de anunciantes{% endblock %}
+{% block content %}<div class="container admin-main">
+<div class="admin-heading"><div><span class="kicker">PORTAL V1.1 · GESTÃO DE ACESSOS</span><h1>Contas de anunciantes</h1><p>Crie credenciais exclusivas para os seus clientes e associe as campanhas na ficha de cada campanha.</p></div><a class="btn btn-outline" href="{{ url_for('admin_campaigns') }}">Ver campanhas →</a></div>
+<div class="admin-panel" style="margin-bottom:25px"><h2>Criar novo acesso</h2>
+<form method="post" action="{{ url_for('admin_advertiser_new') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-cols"><div class="form-field"><label>Nome do responsável *</label><input type="text" name="nome" maxlength="130" placeholder="Nome do contacto" required></div>
+<div class="form-field"><label>Nome da empresa *</label><input type="text" name="empresa" maxlength="140" placeholder="Nome comercial" required></div></div>
+<div class="form-cols"><div class="form-field"><label>E-mail para login *</label><input type="email" name="email" maxlength="200" required placeholder="cliente@empresa.pt"></div>
+<div class="form-field"><label>Palavra-passe inicial *</label><input type="password" name="senha" minlength="12" maxlength="128" autocomplete="new-password" required placeholder="Mínimo 12 caracteres"></div></div>
+<div class="form-actions"><button class="btn btn-primary" type="submit">+ Criar conta</button><small class="muted">Partilhe as credenciais por um canal seguro; não são enviados e-mails automaticamente.</small></div></form></div>
+<div class="admin-panel"><div class="panel-title"><h2>Clientes com acesso</h2><small>{{ accounts|length }} contas</small></div><div class="table-wrap"><table><thead><tr><th>Empresa / contacto</th><th>E-mail</th><th>Campanhas</th><th>Estado</th><th>Gestão</th></tr></thead><tbody>
+{% for a in accounts %}<tr><td><strong>{{ a.empresa }}</strong><br><small>{{ a.nome }}</small></td><td>{{ a.email }}</td><td>{{ a.campanhas }}</td><td><span class="pill {{ 'good' if a.ativo else 'muted-pill' }}">{{ 'Ativa' if a.ativo else 'Bloqueada' }}</span></td><td>
+<form method="post" action="{{ url_for('admin_advertiser_toggle',id=a.id) }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="mini-btn">{{ 'Bloquear' if a.ativo else 'Reativar' }}</button></form>
+<details class="reset-details"><summary>Redefinir senha</summary><form method="post" action="{{ url_for('admin_advertiser_reset_password',id=a.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="password" name="senha" minlength="12" maxlength="128" required placeholder="Nova palavra-passe"><button class="mini-btn" type="submit">Guardar</button></form></details></td></tr>
+{% else %}<tr><td colspan="5" class="empty">Nenhum anunciante cadastrado. Crie a primeira conta acima.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>{% endblock %}

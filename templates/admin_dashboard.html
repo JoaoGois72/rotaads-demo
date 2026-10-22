@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% block title %}Painel de gestão{% endblock %}
+{% block content %}<div class="container admin-main">
+  <div class="admin-heading"><div><span class="kicker">PAINEL EXECUTIVO</span><h1>Visão geral</h1><p>Resumo operacional da rede de publicidade.</p></div><a class="btn btn-primary" href="{{ url_for('admin_campaign_new') }}">+ Nova campanha</a></div>
+  <div class="stat-grid">
+    <div class="stat-card"><span>Pedidos recebidos</span><strong>{{ lead_count }}</strong><small>Formulários no site</small></div>
+    <div class="stat-card"><span>Campanhas criadas</span><strong>{{ campaigns_count }}</strong><small>Campanhas na plataforma</small></div>
+    <div class="stat-card"><span>Ecrãs online</span><strong>{{ online_count }} <i>/ {{ devices_count }}</i></strong><small>Sinal recebido nos últimos 120 s</small></div>
+    <div class="stat-card"><span>Reproduções registadas</span><strong>{{ plays }}</strong><small>Eventos técnicos de início</small></div>
+    <div class="stat-card"><span>Acessos a QR Codes</span><strong>{{ scans }}</strong><small>Não equivalem a vendas</small></div>
+  </div>
+  <div class="admin-panel" style="margin-bottom:24px"><div class="panel-title"><div><h2>Gestão de Frotas e Motoristas — V1.4</h2><p class="muted">Parceiros TVDE, veículos, contratos de cedência e controlo manual de mensalidades.</p></div><a class="btn btn-primary" href="{{ url_for('admin_frotas_v14') }}">Abrir gestão de frotas →</a></div></div>
+  <div class="admin-panel" style="margin-bottom:24px"><div class="panel-title"><div><h2>Portal do anunciante — V1.1</h2><p class="muted">Contas comerciais com acesso privado às suas campanhas e indicadores atualizados automaticamente.</p></div><a class="btn btn-primary" href="{{ url_for('admin_advertisers') }}">Gerir {{ advertisers_count }} contas →</a></div></div>
+  <div class="admin-panel" style="margin-bottom:24px"><div class="panel-title"><div><h2>Dashboard Inteligente V1.3.1</h2><p class="muted">Campanhas, zonas, horários, QR Codes e relatórios em tempo real aproximado.</p></div><a class="btn btn-primary" href="{{ url_for('admin_intelligence') }}">Abrir dashboard →</a></div></div>
+  <div class="admin-panel" style="margin-bottom:24px"><div class="panel-title"><div><h2>Motor de publicidade V1.3</h2><p class="muted">Prioridade, horário e rotação por regras verificáveis. Inativo por defeito nos ecrãs existentes.</p></div><a class="btn btn-outline" href="{{ url_for('admin_optimization') }}">Painel de otimização →</a></div></div>
+  <div class="admin-double">
+    <div class="admin-panel"><div class="panel-title"><h2>Pedidos recentes</h2><a href="{{ url_for('admin_leads') }}">Ver todos →</a></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome / Empresa</th><th>Perfil</th><th>Carros</th></tr></thead><tbody>
+        {% for l in recent %}<tr><td><strong>{{ l.nome }}</strong><br><small>{{ l.empresa }}</small></td><td>{{ form_types[l.tipo] }}</td><td>{{ l.carros }}</td></tr>{% else %}<tr><td colspan="3" class="empty">Ainda não existem pedidos.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </div>
+    <div class="admin-panel"><div class="panel-title"><h2>Campanhas</h2><a href="{{ url_for('admin_campaigns') }}">Ver todas →</a></div>
+      <div class="table-wrap"><table><thead><tr><th>Campanha</th><th>Alocação</th><th>Estado</th></tr></thead><tbody>
+      {% for c in campaigns %}<tr><td><a href="{{ url_for('admin_campaign_detail', id=c.id) }}"><strong>{{ c.nome }}</strong></a><br><small>{{ c.anunciante }}</small></td><td>{{ c.atribuicoes }} / {{ c.carros_contratados }}</td><td><span class="pill {{ 'good' if c.ativo else 'muted-pill' }}">{{ 'Ativa' if c.ativo else 'Pausada' }}</span></td></tr>{% else %}<tr><td colspan="3" class="empty">Ainda não existem campanhas.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </div>
+  </div>
+</div>{% endblock %}

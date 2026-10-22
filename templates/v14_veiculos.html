@@ -1,0 +1,30 @@
+{% extends 'base.html' %}{% block title %}Veículos V1.4{% endblock %}
+{% block content %}<div class="container admin-main v14-page">
+  {% set v14_header_title = 'Veículos e ecrãs' %}
+  {% include '_v14_nav.html' %}
+  <section class="admin-panel v14-section"><div class="panel-title"><div><h2>Registar veículo</h2><p class="muted">Associe um ecrã Android existente (opcional). O cadastro não altera a playlist do ecrã.</p></div></div>
+    <form class="v14-form" method="post" action="{{ url_for('admin_veiculo_create_v14') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Matrícula <input name="matricula" maxlength="18" required placeholder="AA-00-AA"></label>
+      <label>Marca <input name="marca" maxlength="80"></label><label>Modelo <input name="modelo" maxlength="80"></label>
+      <label>Frota <select name="frota_id"><option value="">Veículo individual</option>{% for f in frotas %}<option value="{{ f.id }}">{{ f.empresa }}</option>{% endfor %}</select></label>
+      <label>Motorista <select name="motorista_id"><option value="">Sem motorista atribuído</option>{% for m in motoristas %}<option value="{{ m.id }}">{{ m.nome }} — {{ 'Individual' if not m.frota_id else 'Frota #' ~ m.frota_id }}</option>{% endfor %}</select></label>
+      <label>Ecrã Android <select name="dispositivo_id"><option value="">Sem ecrã vinculado</option>{% for d in ecras if not d.associado %}<option value="{{ d.id }}">{{ d.nome }}</option>{% endfor %}</select></label>
+      <div class="v14-form-actions"><button class="btn btn-primary">+ Registar veículo</button></div>
+    </form>
+    <p class="muted v14-help">Para motoristas de frota, escolha a mesma frota nos campos acima; para independentes, deixe a frota em branco.</p>
+  </section>
+  <section class="admin-panel"><div class="panel-title"><h2>Veículos registados</h2><span class="muted">{{ rows|length }} registo(s)</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Matrícula / veículo</th><th>Frota</th><th>Motorista</th><th>Ecrã</th><th>Estado</th><th>Gerir</th></tr></thead><tbody>
+      {% for r in rows %}<tr><td><strong>{{ r.matricula }}</strong><br><small>{{ r.marca }} {{ r.modelo }}</small></td><td>{{ r.frota or 'Individual' }}</td><td>{{ r.motorista or '—' }}</td><td>{{ r.ecra or 'Não associado' }}</td>
+        <td><span class="pill {{ 'good' if r.ativo else 'muted-pill' }}">{{ 'Ativo' if r.ativo else 'Inativo' }}</span></td>
+        <td><details><summary>Editar</summary><form class="v14-edit" method="post" action="{{ url_for('admin_veiculo_update_v14',id=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label>Matrícula <input name="matricula" value="{{ r.matricula }}" required></label><label>Marca <input name="marca" value="{{ r.marca }}"></label><label>Modelo <input name="modelo" value="{{ r.modelo }}"></label>
+          <label>Frota <select name="frota_id"><option value="">Individual</option>{% for f in frotas %}<option value="{{ f.id }}" {% if r.frota_id==f.id %}selected{% endif %}>{{ f.empresa }}</option>{% endfor %}</select></label>
+          <label>Motorista <select name="motorista_id"><option value="">Sem motorista</option>{% for m in motoristas %}<option value="{{ m.id }}" {% if r.motorista_id==m.id %}selected{% endif %}>{{ m.nome }}</option>{% endfor %}</select></label>
+          <label>Ecrã <select name="dispositivo_id"><option value="">Sem ecrã</option>{% for d in ecras if not d.associado or d.associado == r.id %}<option value="{{ d.id }}" {% if r.dispositivo_id==d.id %}selected{% endif %}>{{ d.nome }}</option>{% endfor %}</select></label>
+          <button class="btn btn-primary">Guardar</button></form></details>
+          <form method="post" action="{{ url_for('admin_veiculo_toggle_v14',id=r.id) }}" class="v14-small-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="v14-link">{{ 'Inativar' if r.ativo else 'Reativar' }}</button></form>
+        </td></tr>{% else %}<tr><td colspan="6" class="empty">Nenhum veículo registado.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>{% endblock %}

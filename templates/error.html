@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block title %}Indisponível{% endblock %}
+{% block content %}<section class="simple-page"><div class="container centered"><span class="kicker">PEDIDO NÃO CONCLUÍDO</span><h1>Não foi possível continuar.</h1><p>{{ msg }}</p><a class="btn btn-primary" href="{{ url_for('home') }}">Ir para início ↗</a></div></section>{% endblock %}
